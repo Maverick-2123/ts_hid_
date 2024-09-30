@@ -4,11 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:ts_hid/components/Alerts/addIssueCredAlert.dart';
-import 'package:ts_hid/components/dropDown.dart';
-import 'package:ts_hid/components/glassCards/glassCard.dart';
-import 'package:ts_hid/components/glassCards/notesCard.dart';
-import 'package:ts_hid/components/pieChart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ts_hid/components/textFields.dart';
 import 'package:ts_hid/globals/global_variables.dart';
 import 'package:ts_hid/pages/allIssuesPage.dart';
@@ -42,9 +38,13 @@ class _AddIssueState extends State<AddIssue> {
 
   Future<void> _submitIssue() async {
     if (requesterNameController.text.isEmpty ||
+        regionController.text.isEmpty||
         productFamilyController.text.isEmpty ||
         productNameController.text.isEmpty ||
         countryController.text.isEmpty ||
+        summaryController.text.isEmpty ||
+        productTicketNumberController.text.isEmpty ||
+        ticketNumberController.text.isEmpty ||
         softwareVersionController.text.isEmpty ||
         issueTitleController.text.isEmpty ||
         issueDescriptionController.text.isEmpty) {
@@ -71,7 +71,7 @@ class _AddIssueState extends State<AddIssue> {
       "technology": softwareVersionController.text,
       "product": productNameController.text,
       "description": issueDescriptionController.text,
-      "summary": "Updated summary",
+      "summary": summaryController.text,
       "status": "Newly Registered",
       "title": issueTitleController.text,
       "severity": severities[selectedSeverityIndex],
@@ -81,9 +81,12 @@ class _AddIssueState extends State<AddIssue> {
       "problem_ticket": productTicketNumberController.text
     };
 
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
     final response = await http.post(
       Uri.parse('http://15.207.244.117/api/issues/'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json',
+        'Authorization' : 'Token $token'},
       body: jsonEncode(issueData),
     );
 
@@ -396,6 +399,21 @@ class _AddIssueState extends State<AddIssue> {
                         Padding(
                           padding: const EdgeInsets.only(top: 30),
                           child: Text(
+                            'Issue Summary:',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        CustomTextField(
+                          controller: summaryController,
+                          hintText: '  Current Summary',
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 30),
+                          child: Text(
                             'Explain Issue in detail:',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
@@ -422,13 +440,13 @@ class _AddIssueState extends State<AddIssue> {
                                   borderRadius: BorderRadius.circular(15),
                                 )),
                                 padding: WidgetStateProperty.all(
-                                    EdgeInsets.fromLTRB(100, 14, 100, 14)),
+                                    EdgeInsets.fromLTRB(80, 14, 80, 14)),
                               ),
                               child: Text(
                                 'Post Issue',
                                 style: GoogleFonts.poppins(
                                   color: Colors.black,
-                                  fontSize: 16,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),

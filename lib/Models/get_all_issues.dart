@@ -1,7 +1,7 @@
 class GetAllIssues {
   int? id;
-  String? region;
   String? country;
+  String? region;
   String? customer;
   String? technology;
   String? product;
@@ -17,11 +17,12 @@ class GetAllIssues {
   String? problemTicket;
   String? lastUpdated;
   String? softwareVersion;
+  bool? wasReopened;
 
   GetAllIssues(
       {this.id,
-        this.region,
         this.country,
+        this.region,
         this.customer,
         this.technology,
         this.product,
@@ -36,12 +37,13 @@ class GetAllIssues {
         this.ticket,
         this.problemTicket,
         this.lastUpdated,
-        this.softwareVersion});
+        this.softwareVersion,
+        this.wasReopened});
 
   GetAllIssues.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    region = json['region'];
     country = json['country'];
+    region = json['region'];
     customer = json['customer'];
     technology = json['technology'];
     product = json['product'];
@@ -57,13 +59,14 @@ class GetAllIssues {
     problemTicket = json['problem_ticket'];
     lastUpdated = json['last_updated'];
     softwareVersion = json['software_version'];
+    wasReopened = json['was_reopened'] ?? false;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
-    data['region'] = this.region;
     data['country'] = this.country;
+    data['region'] = this.region;
     data['customer'] = this.customer;
     data['technology'] = this.technology;
     data['product'] = this.product;
@@ -79,6 +82,7 @@ class GetAllIssues {
     data['problem_ticket'] = this.problemTicket;
     data['last_updated'] = this.lastUpdated;
     data['software_version'] = this.softwareVersion;
+    data['was_reopened'] = this.wasReopened;
     return data;
   }
 }

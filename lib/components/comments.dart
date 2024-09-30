@@ -14,7 +14,7 @@ class Comment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10, bottom: 5),
+      padding: const EdgeInsets.only(top: 10),
       child: Container(
         margin: EdgeInsets.only(left: 20, right: 20),
         decoration: BoxDecoration(
@@ -32,26 +32,21 @@ class Comment extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                     fontSize: 14),),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text('    By : ' + user, style: TextStyle(
-                      fontFamily: 'NokiaPureText_Bd',
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal
-                  ),),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Text('Posted at : ' + time, style: GoogleFonts.poppins(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12)),
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 10, 10, 10),
+              child: Text('By : ' + user, style: TextStyle(
+                  fontFamily: 'NokiaPureText_Bd',
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal
+              ),),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 5, 10, 20),
+              child: Text('Posted at : ' + time, style: GoogleFonts.poppins(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12)),
             )
 
           ],

@@ -17,6 +17,7 @@ TextEditingController issueDescriptionController = TextEditingController();
 TextEditingController ticketNumberController = TextEditingController();
 TextEditingController productTicketNumberController = TextEditingController();
 TextEditingController commentsController = TextEditingController();
+TextEditingController summaryController = TextEditingController();
 
 //search controller
 TextEditingController searchController = TextEditingController();

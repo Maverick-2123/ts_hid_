@@ -6,6 +6,7 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ts_hid/components/glassCards/addressedIssueCard.dart';
 import 'package:ts_hid/globals/global_variables.dart';
 import '../Models/get_all_issues.dart';
@@ -23,7 +24,7 @@ class AddressedIssues extends StatefulWidget {
 }
 
 class _AddressedIssuesState extends State<AddressedIssues> {
-  final String issueBaseURL = 'http://15.207.244.117/api/issues/';
+  final String issueBaseURL = 'http://15.207.244.117/api/addressed-issues/';
 
   late Future<List<GetAllIssues>> futureIssues;
 
@@ -34,18 +35,27 @@ class _AddressedIssuesState extends State<AddressedIssues> {
   }
 
   Future<List<GetAllIssues>> fetchAllResolvedIssues() async {
-    final response = await http.get(Uri.parse(issueBaseURL));
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+    final response = await http.get(
+      Uri.parse(issueBaseURL),
+      headers: {
+        'Authorization': 'Token $token',
+      },
+    );
 
     if (response.statusCode == 200) {
-      List<dynamic> jsonData = jsonDecode(response.body);
+      Map<String, dynamic> jsonData = jsonDecode(response.body);
+      List<dynamic> issuesList = jsonData['issues'];
       List<GetAllIssues> issues =
-          jsonData.map((json) => GetAllIssues.fromJson(json)).toList();
+      issuesList.map((issueJson) => GetAllIssues.fromJson(issueJson)).toList();
       issues.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
       return issues;
     } else {
       throw Exception('Failed to load issues');
     }
   }
+
 
   String formatDate(String dateString) {
     if (dateString.isEmpty) return '';
@@ -61,6 +71,11 @@ class _AddressedIssuesState extends State<AddressedIssues> {
 
     return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            onPressed: (){
+              Navigator.of(context).pop();
+            },
+            icon : Icon(Icons.arrow_back_ios, color: Colors.white,)),
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.white),
           backgroundColor: Colors.black,
@@ -89,7 +104,7 @@ class _AddressedIssuesState extends State<AddressedIssues> {
             ),
           ],
         ),
-        drawer: CustomAppDrawer(),
+        //drawer: CustomAppDrawer(),
         body: Container(
           height: double.infinity,
           width: double.infinity,
@@ -155,11 +170,7 @@ class _AddressedIssuesState extends State<AddressedIssues> {
                           );
                         }
 
-                        List<GetAllIssues> resolvedIssues = snapshot.data!
-                            .where((issue) =>
-                                issue.status?.trim() == "Closed" ||
-                                issue.status?.trim() == "Resolved")
-                            .toList();
+                        List<GetAllIssues> resolvedIssues = snapshot.data!.toList();
 
                         if (resolvedIssues.isEmpty) {
                           return Center(

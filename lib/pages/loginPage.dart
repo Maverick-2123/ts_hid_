@@ -1,6 +1,9 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
 import 'dart:convert';
+import 'dart:core';
+import 'dart:core';
+import 'dart:core';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/cupertino.dart';
@@ -23,7 +26,7 @@ class LoginPage extends StatefulWidget {
 }
 
 Future<bool> login(String username, String password) async {
-  final url = Uri.parse('http://15.207.244.117/api/login/');
+  final url = Uri.parse('http://15.207.244.117/api-token-auth/');
   final response = await http.post(
     url,
     headers: {
@@ -39,11 +42,13 @@ Future<bool> login(String username, String password) async {
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     //temp access token
-    await prefs.setString('accessToken', data['access']);
+    await prefs.setString('accessToken', data['token']);
     //isLoggedIn
     await prefs.setBool('isLoggedIn', true);
     //user role
-    await prefs.setString('userRole', data['group']);
+    await prefs.setString('userRole', data['role']);
+
+    await prefs.setString('username', data['username']);
     print('login successful');
     return true;
   } else {
@@ -225,6 +230,7 @@ class LoginPageState extends State<LoginPage> {
                           //     await SharedPreferences.getInstance();
                           // final String? role = prefs.getString('userRole');
 
+                          // ignore: prefer_const_constructors
                           Navigator.pushReplacement(context, CupertinoPageRoute(builder: (context)=> AllIssuesPage()));
                           // if (role == 'admin') {
                           //   Navigator.pushReplacement(

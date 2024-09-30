@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:convert';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ts_hid/Models/get_all_issues.dart';
 
 import '../components/Alerts/addIssueCredAlert.dart';
@@ -37,6 +40,7 @@ class _EditIssueState extends State<EditIssue> {
     customerNameController.text = widget.issue.customer ?? 'Customer';
     productTicketNumberController.text = widget.issue.problemTicket ?? 'Product Ticket';
     ticketNumberController.text = widget.issue.ticket ?? 'Ticket Number';
+    summaryController.text = widget.issue.summary ?? 'Current Summary';
     selectedSeverityIndex = severities.indexOf(widget.issue.severity ?? 'Critical');
   }
 
@@ -54,6 +58,7 @@ class _EditIssueState extends State<EditIssue> {
     customerNameController.clear();
     productTicketNumberController.clear();
     ticketNumberController.clear();
+    summaryController.clear();
   }
 
   Future<void> _editIssue(int issueID) async {
@@ -67,6 +72,7 @@ class _EditIssueState extends State<EditIssue> {
         customerNameController.text.isEmpty||
         productTicketNumberController.text.isEmpty||
         ticketNumberController.text.isEmpty||
+        summaryController.text.isEmpty||
         issueDescriptionController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -91,20 +97,24 @@ class _EditIssueState extends State<EditIssue> {
       "technology": softwareVersionController.text,
       "product": productNameController.text,
       "description": issueDescriptionController.text,
-      "summary": "Summary",
-      "status": status[selectedStatusIndex],
+      "summary": summaryController.text,
+      "status": allStatus[selectedStatusIndex],
       "title": issueTitleController.text,
       "severity": severities[selectedSeverityIndex],
       "name": requesterNameController.text,
       "product_family": productFamilyController.text,
       "ticket": ticketNumberController.text,
-      "problem_ticket": productTicketNumberController.text
+      "problem_ticket": productTicketNumberController.text,
+      "was_reopened": (allStatus[selectedStatusIndex] == 'Re-Opened')? true : false,
     };
 
     String issueID = widget.issue.id!.toString();
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
     final response = await http.put(
       Uri.parse('http://15.207.244.117/api/issues/${widget.issue.id}/'),
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json',
+          'Authorization' : 'Token $token'},
       body: jsonEncode(issueData),
     );
 
@@ -155,7 +165,7 @@ class _EditIssueState extends State<EditIssue> {
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xff000000), Color(0xff11307A)],
+            colors: const [Color(0xff000000), Color(0xff11307A)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -227,7 +237,7 @@ class _EditIssueState extends State<EditIssue> {
                                 magnification: 1.2,
                                 itemExtent: 45,
                                 scrollController: FixedExtentScrollController(
-                                  initialItem: 1,
+                                  initialItem: allStatus.indexOf(widget.issue.status!),
                                 ),
                                 onSelectedItemChanged: (int index) {
                                   setState(() {
@@ -235,7 +245,68 @@ class _EditIssueState extends State<EditIssue> {
                                   });
                                 },
                                 backgroundColor: Colors.transparent,
-                                children: List<Widget>.generate(
+                                children: (widget.issue.status == 'Resolved' || widget.issue.status == 'Closed') ?
+                                List<Widget>.generate(
+                                  addressedStatus.length,
+                                      (int index) {
+                                    return Center(
+                                      child: Text(
+                                        addressedStatus[index],
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ) : (widget.issue.status == 'Pending')?
+                                List<Widget>.generate(
+                                  ifPendingStatus.length,
+                                      (int index) {
+                                    return Center(
+                                      child: Text(
+                                        ifPendingStatus[index],
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ) : (widget.issue.status == 'In-Progress')?
+                                List<Widget>.generate(
+                                    ifInProgressStatus.length,
+                                      (int index) {
+                                    return Center(
+                                      child: Text(
+                                        ifInProgressStatus[index],
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ) : (widget.issue.status == 'Re-Opened')?
+                                List<Widget>.generate(
+                                  reopenedStatus.length,
+                                      (int index) {
+                                    return Center(
+                                      child: Text(
+                                        reopenedStatus[index],
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ) :
+                                List<Widget>.generate(
                                   status.length,
                                       (int index) {
                                     return Center(
@@ -249,7 +320,7 @@ class _EditIssueState extends State<EditIssue> {
                                       ),
                                     );
                                   },
-                                ),
+                                )
                               ),
                             ),
                           ],
@@ -403,6 +474,21 @@ class _EditIssueState extends State<EditIssue> {
                         CustomTextField(
                           controller: issueTitleController,
                           hintText: '  e.g., Heating Issue in 1830PSS',
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 30),
+                          child: Text(
+                            'Issue Summary:',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        CustomTextField(
+                          controller: summaryController,
+                          hintText: '  Current Summary',
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 30),

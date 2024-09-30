@@ -24,6 +24,7 @@ class NotesCard extends StatefulWidget {
   final textColor;
   final status;
   final lastUpdated;
+  final bool wasReopened;
 
 
   NotesCard({
@@ -35,6 +36,7 @@ class NotesCard extends StatefulWidget {
     required this.titleText,
     required this.postedTime,
     required this.ticketNumber,
+    required this.wasReopened,
     //to be updated from database
     this.status,
     this.description,
@@ -175,6 +177,11 @@ class _NotesCardState extends State<NotesCard> {
                         fontSize: 12,
                         fontWeight: FontWeight.w500),
                   ),
+                  if (widget.wasReopened)
+                    Text(
+                      '*',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   SizedBox(width: MediaQuery.of(context).size.width*0.05,)
                 ],
               )

@@ -21,6 +21,8 @@ dependencies:
   lottie: ^3.1.2
   awesome_snackbar_content: ^0.1.4
   shared_preferences: ^2.2.3
+  local_auth: ^2.3.0
+  flutter_email_sender: ^6.0.3
 
 dev_dependencies:
   flutter_test:

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ts_hid/pages/addressedIssues.dart';
 import 'package:ts_hid/pages/allIssuesPage.dart';
+import 'package:ts_hid/pages/contactUs.dart';
 import 'package:ts_hid/pages/loginPage.dart';
 import 'package:ts_hid/pages/profile.dart';
 import 'package:ts_hid/pages/teamSelector.dart';
@@ -17,40 +18,28 @@ class CustomAppDrawer extends StatefulWidget {
 
 class _CustomAppDrawerState extends State<CustomAppDrawer> {
 
-  Future<void> logout(BuildContext context) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    await prefs.remove('accessToken');
-    await prefs.remove('isLoggedIn');
-    await prefs.remove('userRole');
-
-    // Navigate to the login page and remove all previous routes
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => LoginPage()),
-          (route) => false,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Drawer(
-      width: screenWidth * 0.85,
-      backgroundColor: Color(0xff021526),
+      width: screenWidth * 0.9,
+      backgroundColor: const Color(0xff021526),
       child: Padding(
         padding: const EdgeInsets.only(left: 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            SizedBox(
+              height: screenHeight*0.1,
+            ),
             ListTile(
               onTap: () {
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => AllIssuesPage()));
               },
-              leading: Icon(
+              leading: const Icon(
                 Icons.all_inbox_rounded,
                 color: Colors.white,
               ),
@@ -59,26 +48,27 @@ class _CustomAppDrawerState extends State<CustomAppDrawer> {
                 style: GoogleFonts.poppins(color: Colors.white),
               ),
             ),
+            // ListTile(
+            //   leading: const Icon(
+            //     Icons.edit_note,
+            //     color: Colors.white,
+            //   ),
+            //   title: Text(
+            //     ' P R E F E R E N C E S',
+            //     style: GoogleFonts.poppins(color: Colors.white),
+            //   ),
+            //   onTap: () {
+            //     Navigator.push(
+            //         context, MaterialPageRoute(builder: (_) => const TeamSelector()));
+            //   },
+            // ),
             ListTile(
-              leading: Icon(
-                Icons.edit_note,
-                color: Colors.white,
-              ),
-              title: Text(
-                ' P R E F E R E N C E S',
-                style: GoogleFonts.poppins(color: Colors.white),
-              ),
               onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => TeamSelector()));
-              },
-            ),
-            ListTile(
-              onTap: () {
+                Navigator.of(context).pop();
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddressedIssues()));
+                    MaterialPageRoute(builder: (context) => const AddressedIssues()));
               },
-              leading: Icon(
+              leading: const Icon(
                 Icons.check_circle_outline_outlined,
                 color: Colors.white,
               ),
@@ -88,7 +78,7 @@ class _CustomAppDrawerState extends State<CustomAppDrawer> {
               ),
             ),
             ListTile(
-              leading: Icon(
+              leading: const Icon(
                 Icons.account_circle_rounded,
                 color: Colors.white,
               ),
@@ -97,8 +87,24 @@ class _CustomAppDrawerState extends State<CustomAppDrawer> {
                 style: GoogleFonts.poppins(color: Colors.white),
               ),
               onTap: () {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> ProfilePage()));
+                Navigator.of(context).pop();
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> ProfilePage()));
               },
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ContactUs()));
+              },
+              leading: const Icon(
+                Icons.call,
+                color: Colors.white,
+              ),
+              title: Text(
+                'C O N T A C T  U S',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
             ),
             SizedBox(
               height: screenHeight * 0.4,

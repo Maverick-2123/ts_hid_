@@ -1,3 +1,6 @@
+import 'dart:core';
+import 'dart:core';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ts_hid/components/comments.dart';
@@ -34,6 +37,11 @@ DateTime currentTime = DateTime.now();
 
 //Status Variables
 List <String> status = ['Newly Registered', 'In-Progress', 'Pending', 'Resolved', 'Closed'];
+List <String> allStatus = ['Newly Registered', 'In-Progress', 'Pending', 'Resolved', 'Closed', 'Re-Opened'];
+List <String> addressedStatus = ['Re-Opened', 'Resolved', 'Closed'];
+List <String> ifPendingStatus = ['In-Progress', 'Resolved', 'Closed'];
+List <String> ifInProgressStatus = ['Pending', 'Resolved', 'Closed'];
+List <String> reopenedStatus = ['In-Progress', 'Pending', 'Resolved', 'Closed'];
 String? selectedStatus;
 int selectedStatusIndex = 0;
 
@@ -57,4 +65,4 @@ List <String> commentContent = [commentsController.text];
 List <String> commentor = ['admin'];
 List <String> commentTime = [DateTime.now().toString()];
 
-//replace pushReplacement after the presentation
+

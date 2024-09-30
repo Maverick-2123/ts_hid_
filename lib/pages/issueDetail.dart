@@ -47,9 +47,13 @@ class _IssueDetailState extends State<IssueDetail> {
   late int issueID;
 
   Future<List<CommentsModel>> fetchComments(issueID) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
     final String commentBaseURL = 'http://15.207.244.117/issues/$issueID/comments/';
-    final response = await http.get(Uri.parse(commentBaseURL));
-
+    final response = await http.get(Uri.parse(commentBaseURL),
+    headers: {
+      'Authorization' : 'Token $token'
+    });
     if (response.statusCode == 200) {
       List<dynamic> jsonData = jsonDecode(response.body);
       List<CommentsModel> comments = jsonData.map((json) => CommentsModel.fromJson(json)).toList();
@@ -78,14 +82,19 @@ class _IssueDetailState extends State<IssueDetail> {
       return;
     }
 
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+    final username = prefs.getString('username');
+
     final Map<String, dynamic> commentData = {
         "content": commentsController.text,
-        "user": 1
+        "user": username,
     };
 
     final commentResponse = await http.post(
       Uri.parse('http://15.207.244.117/issues/${widget.issue.id}/comments/'),
-      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      headers: {'Content-Type': 'application/json',
+        'Authorization' : 'Token $token'},
       body: jsonEncode(commentData),
     );
 
@@ -134,6 +143,12 @@ class _IssueDetailState extends State<IssueDetail> {
     });
   }
 
+  void refreshComments() {
+    setState(() {
+      futureComments = fetchComments(widget.issue.id!);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -144,8 +159,7 @@ class _IssueDetailState extends State<IssueDetail> {
         backgroundColor: Colors.black,
         leading: IconButton(
           onPressed: () {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => AllIssuesPage()));
+            Navigator.of(context).pop();
           },
           icon: Icon(
             Icons.arrow_back_ios_outlined,
@@ -153,7 +167,7 @@ class _IssueDetailState extends State<IssueDetail> {
           ),
         ),
         actions: [
-          (userRole == 'admin' || userRole == 'managers') ? IconButton(
+          (userRole == 'Global Manager' || userRole == 'Managers' || userRole == 'Regional Manager') ? IconButton(
               onPressed: () {
                 Navigator.push(
                     context,
@@ -238,13 +252,13 @@ class _IssueDetailState extends State<IssueDetail> {
                           TagsButton(
                             tagBoxColor: Colors.white30,
                             textColor: Colors.white,
-                            tags: 'S/w Ver : ${widget.issue.technology!}',
+                            tags: 'S/w Ver : ${widget.issue.softwareVersion!}',
                           ),
-                          // TagsButton(
-                          //   tagBoxColor: Colors.white30,
-                          //   textColor: Colors.white,
-                          //   tags: widget.issue.name!,
-                          // ),
+                          TagsButton(
+                            tagBoxColor: Colors.white30,
+                            textColor: Colors.white,
+                            tags: 'Technology : ${widget.issue.technology!}',
+                          ),
                         ],
                       ),
                       SizedBox(
@@ -307,6 +321,34 @@ class _IssueDetailState extends State<IssueDetail> {
                       SizedBox(
                         height: screenHeight * 0.03,
                       ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15),
+                        child: Text('Current Summary :', style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500
+                        ),),
+                      ),
+                      Text(
+                        widget.issue.summary!,
+                        style:TextStyle(
+                            fontFamily: 'NokiaPureHeadline_ULt',
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w200
+                        ),
+                      ),
+                      SizedBox(
+                        height: screenHeight * 0.07,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15),
+                        child: Text('Issue Description :', style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500
+                        ),),
+                      ),
                       Text(
                         widget.issue.description!,
                         style:TextStyle(
@@ -323,12 +365,12 @@ class _IssueDetailState extends State<IssueDetail> {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, bottom: 10),
+              const Padding(
+                padding: EdgeInsets.only(left: 20, bottom: 10),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                   'Status Summary :',
+                   'Status Update :',
                     style:TextStyle(
                         fontFamily: 'NokiaPureText_Rg',
                         color: Colors.white,
@@ -339,7 +381,7 @@ class _IssueDetailState extends State<IssueDetail> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.only(top: 20, bottom: 20),
+                padding: EdgeInsets.only(top: 5, bottom: 20),
                 margin: EdgeInsets.only(bottom: 0),
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -347,14 +389,20 @@ class _IssueDetailState extends State<IssueDetail> {
                   color: Colors.black54,
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // IconButton(
+                    //     onPressed: (){
+                    //         refreshComments();
+                    //     },
+                    //     icon: Icon(Icons.refresh_rounded, color: Colors.white,)),
                     FutureBuilder<List<CommentsModel>>(
                       future: futureComments,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return Center(child: RefreshProgressIndicator(color: Colors.white,));
                         } else if (snapshot.hasError) {
-                          return Center(child: Text('Check your internet!'));
+                          return Center(child: Text('Check your internet!', style: TextStyle(color: Colors.white),));
                         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                           return Center(child: Text('No updates yet.',
                           style: GoogleFonts.poppins(
@@ -373,7 +421,7 @@ class _IssueDetailState extends State<IssueDetail> {
                               final comment = comments[index];
                               return Comment(
                                 text: comment.content!,
-                                user: comment.user!.toString(),
+                                user: comment.user!,
                                 time: formatCommentDate(comment.createdAt!),
                               );
                             },
@@ -381,8 +429,7 @@ class _IssueDetailState extends State<IssueDetail> {
                         }
                       },
                     ),
-                    (userRole == 'admin' || userRole == 'managers') ? Padding(
-                      padding: const EdgeInsets.only(top: 20),
+                    (userRole == 'Global Manager' || userRole == 'Managers' || userRole == 'Regional Manager') ? Center(
                       child: ElevatedButton(
                         onPressed: () {
                           showDialog(
